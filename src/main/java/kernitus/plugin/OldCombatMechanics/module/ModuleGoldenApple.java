@@ -124,35 +124,17 @@ public class ModuleGoldenApple extends Module {
         lastEaten.putIfAbsent(uuid, new LastEaten());
 
         // If on cooldown send appropriate cooldown message
-        if (cooldown.isOnCooldown(item, lastEaten.get(uuid))) {
-            final LastEaten le = lastEaten.get(uuid);
 
             final long baseCooldown;
-            Instant current;
-            final String message;
 
             if (consumedMaterial == Material.GOLDEN_APPLE) {
                 baseCooldown = cooldown.normal;
-                current = le.lastNormalEaten;
-                message = normalCooldownMessage;
             } else {
                 baseCooldown = cooldown.enchanted;
-                current = le.lastEnchantedEaten;
-                message = enchantedCooldownMessage;
             }
 
-            final Optional<Instant> newestEatTime = le.getNewestEatTime();
-            if (cooldown.sharedCooldown && newestEatTime.isPresent())
-                current = newestEatTime.get();
 
-            final long seconds = baseCooldown - (Instant.now().getEpochSecond() - current.getEpochSecond());
-
-            if (message != null && !message.isEmpty())
-                Messenger.sendNormalMessage(p, message.replaceAll("%seconds%", String.valueOf(seconds)));
-
-            e.setCancelled(true);
-            return;
-        }
+            p.setCooldown(consumedMaterial, (int) (baseCooldown * 20));
 
         lastEaten.get(p.getUniqueId()).setForItem(item);
 
